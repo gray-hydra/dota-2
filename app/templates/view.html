@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>All Items</title>
+    <style>
+        input[type="number"] {
+            width: 50px;
+        }
+
+        td,
+        th {
+            text-align: center;
+            padding: 6px 10px;
+        }
+
+        th {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        th:hover {
+            background-color: #ddd;
+        }
+
+        th.sorted {
+            background-color: #ccc;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .rank-cell {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>All Items</h2>
+    <p><a href="/">← Back to Generate</a></p>
+
+    <table border="1" id="items-table">
+        <thead>
+            <tr>
+                <th data-key="id">Item</th>
+                <th data-key="team">Team</th>
+                <th data-key="rank_value1" data-type="number">R1</th>
+                <th data-key="rank_value2" data-type="number">R2</th>
+                <th data-key="rank_value3" data-type="number">R3</th>
+                <th data-key="rank_value4" data-type="number">R4</th>
+                <th data-key="rank_value5" data-type="number">R5</th>
+                <th data-key="rank_value6" data-type="number">R6</th>
+                <th data-key="rank_value7" data-type="number">R7</th>
+                <th data-key="rank_value8" data-type="number">R8</th>
+                <th data-key="rank_value9" data-type="number">R9</th>
+                <th data-key="rank_value10" data-type="number">R10</th>
+                <th data-key="rank_value11" data-type="number">R11</th>
+            </tr>
+        </thead>
+        <tbody id="table-body">
+        </tbody>
+    </table>
+
+    <script>
+        let allItems = [];
+        let sortKey = 'rank_value11';
+        let sortAsc = false;
+
+        function ordinal(n) {
+            const s = ["th", "st", "nd", "rd"];
+            const v = n % 100;
+            return n + (s[(v - 20) % 10] || s[v] || s[0]);
+        }
+
+        function createRow(item) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item.id}</td>
+                <td>${item.team}</td>
+                <td class="rank-cell" style="background-color: ${item.color_value1}">${ordinal(item.rank_value1)}</td>
+                <td class="rank-cell" style="background-color: ${item.color_value2}">${ordinal(item.rank_value2)}</td>
+                <td class="rank-cell" style="background-color: ${item.color_value3}">${ordinal(item.rank_value3)}</td>
+                <td class="rank-cell" style="background-color: ${item.color_value4}">${ordinal(item.rank_value4)}</td>
+                <td class="rank-cell" style="background-color: ${item.color_value5}">${ordinal(item.rank_value5)}</td>
+                <td class="rank-cell" style="background-color: ${item.color_value6}">${ordinal(item.rank_value6)}</td>
+                <td class="rank-cell" style="background-color: ${item.color_value7}">${ordinal(item.rank_value7)}</td>
+                <td class="rank-cell" style="background-color: ${item.color_value8}">${ordinal(item.rank_value8)}</td>
+                <td class="rank-cell" style="background-color: ${item.color_value9}">${ordinal(item.rank_value9)}</td>
+                <td class="rank-cell" style="background-color: ${item.color_value10}">${ordinal(item.rank_value10)}</td>
+                <td class="rank-cell" style="background-color: ${item.color_value11}">${ordinal(item.rank_value11)}</td>
+            `;
+            return row;
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            allItems.forEach(item => {
+                tbody.appendChild(createRow(item));
+            });
+        }
+
+        function sortBy(key, isNumber) {
+            // Toggle direction if same key
+            if (sortKey === key) {
+                sortAsc = !sortAsc;
+            } else {
+                sortKey = key;
+                sortAsc = true;
+            }
+
+            allItems.sort((a, b) => {
+                let valA = a[key];
+                let valB = b[key];
+                if (isNumber) {
+                    valA = Number(valA);
+                    valB = Number(valB);
+                }
+                if (valA < valB) return sortAsc ? -1 : 1;
+                if (valA > valB) return sortAsc ? 1 : -1;
+                return 0;
+            });
+
+            // Update header styling
+            document.querySelectorAll('th').forEach(th => {
+                th.classList.remove('sorted');
+                if (th.dataset.key === key) {
+                    th.classList.add('sorted');
+                }
+            });
+
+            renderTable();
+        }
+
+        // Load data on page load
+        async function loadData() {
+            const response = await fetch('/all');
+            const data = await response.json();
+            allItems = data.items;
+            sortBy('rank_value11', true);  // Default sort by R11
+        }
+
+        // Add click handlers to headers
+        document.querySelectorAll('th').forEach(th => {
+            th.addEventListener('click', () => {
+                const key = th.dataset.key;
+                const isNumber = th.dataset.type === 'number';
+                sortBy(key, isNumber);
+            });
+        });
+
+        loadData();
+    </script>
+</body>
+
+</html>

@@ -1,5 +1,4 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Lightsail instance with Debian 13, auto-updates, and Syncthing
 
 Parameters:
   InstanceName:
@@ -62,7 +61,7 @@ Resources:
         # TODO: Set up and run your app
         # python3 -m venv venv
         # source venv/bin/activate
-        # pip install flask
+        # pip install -r requirements
         # systemctl enable myapp  # (create a systemd unit for your app)
 
   StaticIp:
