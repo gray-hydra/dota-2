@@ -2,3 +2,7 @@
 app/.DS_Store
 
 app/__pycache__
+
+venv/
+
+logs/
