@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Lightsail instance with Debian 13, auto-updates, and Syncthing
+
+Parameters:
+  InstanceName:
+    Type: String
+    Default: my-app
+    Description: Name for the Lightsail instance
+
+  SyncthingBucket:
+    Type: String
+    Description: S3 bucket containing Syncthing cert.pem and key.pem
+
+Resources:
+  Instance:
+    Type: AWS::Lightsail::Instance
+    Properties:
+      InstanceName: !Ref InstanceName
+      BlueprintId: debian_13
+      BundleId: nano_3_0
+      UserData: !Sub |
+        #!/bin/bash
+        set -e
+
+        # Update system
+        apt update && apt upgrade -y
+
+        # Install unattended-upgrades for automatic security patches
+        apt install -y unattended-upgrades
+        cat >> /etc/apt/apt.conf.d/50unattended-upgrades <<EOF
+        Unattended-Upgrade::Automatic-Reboot "true";
+        Unattended-Upgrade::Automatic-Reboot-Time "03:00";
+        EOF
+        systemctl enable unattended-upgrades
+
+        # Install AWS CLI for S3 access
+        apt install -y awscli
+
+        # Install Syncthing
+        apt install -y syncthing
+        mkdir -p /root/.config/syncthing
+
+        # Pull Syncthing identity from S3 (keeps same device ID across rebuilds)
+        aws s3 cp s3://${SyncthingBucket}/syncthing/cert.pem /root/.config/syncthing/
+        aws s3 cp s3://${SyncthingBucket}/syncthing/key.pem /root/.config/syncthing/
+        aws s3 cp s3://${SyncthingBucket}/syncthing/config.xml /root/.config/syncthing/ || true
+
+        # Enable and start Syncthing
+        systemctl enable syncthing@root
+        systemctl start syncthing@root
+
+        # Install Python and Flask (remove if using Go/Node instead)
+        apt install -y python3 python3-pip python3-venv
+
+        # Create app directory
+        mkdir -p /opt/app
+        cd /opt/app
+
+        # TODO: Clone your app from Git
+        # git clone https://github.com/youruser/yourrepo.git .
+
+        # TODO: Set up and run your app
+        # python3 -m venv venv
+        # source venv/bin/activate
+        # pip install flask
+        # systemctl enable myapp  # (create a systemd unit for your app)
+
+  StaticIp:
+    Type: AWS::Lightsail::StaticIp
+    Properties:
+      StaticIpName: !Sub ${InstanceName}-ip
+      AttachedTo: !Ref InstanceName
+    DependsOn: Instance
+
+Outputs:
+  InstanceName:
+    Value: !Ref Instance
+    Description: Lightsail instance name
+
+  StaticIpAddress:
+    Value: !GetAtt StaticIp.IpAddress
+    Description: Static IP address - point your Route 53 A record here

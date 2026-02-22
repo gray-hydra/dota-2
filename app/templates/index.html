@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>My App</title>
+</head>
+
+<body>
+    <h1>Values</h1>
+    <form action="/data" method="POST">
+        <table border="1">
+            <tr>
+                <th>Field</th>
+                <th>Current</th>
+                <th>New Value</th>
+            </tr>
+            <tr>
+                <td>Value 1</td>
+                <td>{{ current.value1 }}</td>
+                <td><input type="number" name="value1" value="{{ current.value1 }}"></td>
+            </tr>
+            <tr>
+                <td>Value 2</td>
+                <td>{{ current.value2 }}</td>
+                <td><input type="number" name="value2" value="{{ current.value2 }}"></td>
+            </tr>
+            <tr>
+                <td>Value 3</td>
+                <td>{{ current.value3 }}</td>
+                <td><input type="number" name="value3" value="{{ current.value3 }}"></td>
+            </tr>
+        </table>
+        <br>
+        <button type="submit">Submit</button>
+    </form>
+</body>
+
+</html>
