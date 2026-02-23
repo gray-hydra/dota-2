@@ -22,8 +22,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.LIGHTSAIL_DEPLOY_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.LIGHTSAIL_DEPLOY_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Install Lightsail plugin
@@ -56,8 +56,8 @@ jobs:
                 "environment": {
                   "DYNAMODB_TABLE": "items",
                   "AWS_DEFAULT_REGION": "${{ env.AWS_REGION }}",
-                  "AWS_ACCESS_KEY_ID": "${{ secrets.DYNAMODB_AWS_ACCESS_KEY_ID }}",
-                  "AWS_SECRET_ACCESS_KEY": "${{ secrets.DYNAMODB_AWS_SECRET_ACCESS_KEY }}"
+                  "AWS_ACCESS_KEY_ID": "${{ secrets.DYNAMO_RW_ACCESS_KEY_ID }}",
+                  "AWS_SECRET_ACCESS_KEY": "${{ secrets.DYNAMO_RW_SECRET_ACCESS_KEY }}"
                 }
               }
             }' \
