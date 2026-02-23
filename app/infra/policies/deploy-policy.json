@@ -2,12 +2,17 @@
     "Version": "2012-10-17",
     "Statement": [
         {
+            "Sid": "RegistryLogin",
+            "Effect": "Allow",
+            "Action": "lightsail:CreateContainerServiceRegistryLogin",
+            "Resource": "*"
+        },
+        {
             "Sid": "PushAndDeploy",
             "Effect": "Allow",
             "Action": [
                 "lightsail:RegisterContainerImage",
                 "lightsail:CreateContainerServiceDeployment",
-                "lightsail:CreateContainerServiceRegistryLogin",
                 "lightsail:GetContainerImages",
                 "lightsail:GetContainerServiceDeployments",
                 "lightsail:GetContainerServices",
