@@ -1,0 +1,28 @@
+{
+    "serviceName": "${SERVICE_NAME}",
+    "containers": {
+        "app": {
+            "image": "${IMAGE}",
+            "ports": {
+                "5000": "HTTP"
+            },
+            "environment": {
+                "DYNAMODB_TABLE": "items",
+                "AWS_DEFAULT_REGION": "${AWS_REGION}",
+                "AWS_ACCESS_KEY_ID": "${DYNAMO_KEY}",
+                "AWS_SECRET_ACCESS_KEY": "${DYNAMO_SECRET}"
+            }
+        }
+    },
+    "publicEndpoint": {
+        "containerName": "app",
+        "containerPort": 5000,
+        "healthCheck": {
+            "path": "/health",
+            "intervalSeconds": 30,
+            "timeoutSeconds": 5,
+            "healthyThreshold": 2,
+            "unhealthyThreshold": 2
+        }
+    }
+}
