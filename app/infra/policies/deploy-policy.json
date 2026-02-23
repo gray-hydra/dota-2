@@ -2,15 +2,10 @@
     "Version": "2012-10-17",
     "Statement": [
         {
-            "Sid": "RegistryLogin",
-            "Effect": "Allow",
-            "Action": "lightsail:CreateContainerServiceRegistryLogin",
-            "Resource": "*"
-        },
-        {
-            "Sid": "PushAndDeploy",
+            "Sid": "LightsailDeploy",
             "Effect": "Allow",
             "Action": [
+                "lightsail:CreateContainerServiceRegistryLogin",
                 "lightsail:RegisterContainerImage",
                 "lightsail:CreateContainerServiceDeployment",
                 "lightsail:GetContainerImages",
@@ -18,7 +13,7 @@
                 "lightsail:GetContainerServices",
                 "lightsail:GetContainerLog"
             ],
-            "Resource": "arn:aws:lightsail:*:*:ContainerService/my-app"
+            "Resource": "*"
         },
         {
             "Sid": "DenyCreateResources",
