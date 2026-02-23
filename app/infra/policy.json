@@ -13,7 +13,11 @@
                 "cloudformation:DescribeStackResources",
                 "cloudformation:GetTemplate",
                 "cloudformation:ValidateTemplate",
-                "cloudformation:ListStacks"
+                "cloudformation:ListStacks",
+                "cloudformation:CreateChangeSet",
+                "cloudformation:ExecuteChangeSet",
+                "cloudformation:DescribeChangeSet",
+                "cloudformation:DeleteChangeSet"
             ],
             "Resource": "*",
             "Condition": {

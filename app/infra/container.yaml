@@ -20,10 +20,6 @@ Parameters:
     MaxValue: 20
     Description: Number of container nodes
 
-  ContainerRoleArn:
-    Type: String
-    Description: ARN of IAM role for container to access DynamoDB
-
 Resources:
   # Lightsail Container Service
   ContainerService:
@@ -33,13 +29,6 @@ Resources:
       Power: !Ref Power
       Scale: !Ref Scale
       PublicDomainNames: []
-
-  # Attach IAM role after stack creation - CloudFormation doesn't support this directly
-  # Run this after deploy:
-  # aws lightsail update-container-service \
-  #   --service-name my-app \
-  #   --public-domain-names '{}' \
-  #   --private-registry-access ecrImagePullerRole={isActive=true,principalArn=<ROLE_ARN>}
 
 Outputs:
   ServiceName:

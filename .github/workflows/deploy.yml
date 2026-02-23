@@ -1,0 +1,92 @@
+name: Deploy to Lightsail
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # Weekly rebuild for security patches (Sundays at 3am UTC)
+    - cron: "0 3 * * 0"
+  workflow_dispatch: # Manual trigger
+
+env:
+  SERVICE_NAME: my-app
+  AWS_REGION: us-west-2
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install Lightsail plugin
+        run: |
+          curl "https://s3.us-west-2.amazonaws.com/lightsailctl/latest/linux-amd64/lightsailctl" -o /usr/local/bin/lightsailctl
+          chmod +x /usr/local/bin/lightsailctl
+
+      - name: Build Docker image
+        run: docker build --pull -t $SERVICE_NAME .
+
+      - name: Push to Lightsail
+        id: push
+        run: |
+          IMAGE=$(aws lightsail push-container-image \
+            --service-name $SERVICE_NAME \
+            --label app \
+            --image $SERVICE_NAME \
+            --query 'imageDigest' \
+            --output text)
+          echo "image=$IMAGE" >> $GITHUB_OUTPUT
+
+      - name: Deploy
+        run: |
+          aws lightsail create-container-service-deployment \
+            --service-name $SERVICE_NAME \
+            --containers '{
+              "app": {
+                "image": "${{ steps.push.outputs.image }}",
+                "ports": {"5000": "HTTP"},
+                "environment": {
+                  "DYNAMODB_TABLE": "items",
+                  "AWS_DEFAULT_REGION": "${{ env.AWS_REGION }}",
+                  "AWS_ACCESS_KEY_ID": "${{ secrets.DYNAMODB_AWS_ACCESS_KEY_ID }}",
+                  "AWS_SECRET_ACCESS_KEY": "${{ secrets.DYNAMODB_AWS_SECRET_ACCESS_KEY }}"
+                }
+              }
+            }' \
+            --public-endpoint '{
+              "containerName": "app",
+              "containerPort": 5000,
+              "healthCheck": {
+                "path": "/health",
+                "intervalSeconds": 30,
+                "timeoutSeconds": 5,
+                "healthyThreshold": 2,
+                "unhealthyThreshold": 2
+              }
+            }'
+
+      - name: Wait for deployment
+        run: |
+          echo "Deployment started. Checking status..."
+          for i in {1..30}; do
+            STATUS=$(aws lightsail get-container-services \
+              --service-name $SERVICE_NAME \
+              --query 'containerServices[0].state' \
+              --output text)
+            echo "Status: $STATUS"
+            if [ "$STATUS" = "RUNNING" ]; then
+              echo "Deployment successful!"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Deployment timed out"
+          exit 1
