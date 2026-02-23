@@ -4,157 +4,23 @@
 <head>
     <title>My App</title>
     <style>
-        input[type="number"] {
-            width: 50px;
+        body {
+            font-family: sans-serif;
+            padding: 40px;
         }
 
-        td,
-        th {
-            text-align: center;
-            padding: 4px;
-        }
-
-        button:disabled {
-            background-color: #ccc;
-        }
-
-        table {
-            margin-bottom: 20px;
+        a {
+            display: block;
+            margin: 10px 0;
+            font-size: 18px;
         }
     </style>
 </head>
 
 <body>
-    <button id="generate-btn">Generate</button>
-    <a href="/view" style="margin-left: 20px;">View All Items →</a>
-    <br><br>
-
-    <h3>Team A</h3>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>Item</th>
-                <th>V1</th>
-                <th>V2</th>
-                <th>V3</th>
-                <th>V4</th>
-                <th>V5</th>
-                <th>V6</th>
-                <th>R7</th>
-                <th>R8</th>
-                <th>R9</th>
-                <th>R10</th>
-                <th>R11</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody id="table-1-body">
-        </tbody>
-    </table>
-
-    <h3>Team B</h3>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>Item</th>
-                <th>V1</th>
-                <th>V2</th>
-                <th>V3</th>
-                <th>V4</th>
-                <th>V5</th>
-                <th>V6</th>
-                <th>R7</th>
-                <th>R8</th>
-                <th>R9</th>
-                <th>R10</th>
-                <th>R11</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody id="table-2-body">
-        </tbody>
-    </table>
-
-    <script>
-        function createRow(item) {
-            const row = document.createElement('tr');
-            row.dataset.itemId = item.id;
-            row.innerHTML = `
-                <td>${item.id}</td>
-                <td><input type="number" class="v1" value="1"></td>
-                <td><input type="number" class="v2"></td>
-                <td><input type="number" class="v3"></td>
-                <td><input type="number" class="v4"></td>
-                <td><input type="number" class="v5"></td>
-                <td><input type="number" class="v6"></td>
-                <td class="v7" style="background-color: ${item.color_value7}">${item.rank_value7}</td>
-                <td class="v8" style="background-color: ${item.color_value8}">${item.rank_value8}</td>
-                <td class="v9" style="background-color: ${item.color_value9}">${item.rank_value9}</td>
-                <td class="v10" style="background-color: ${item.color_value10}">${item.rank_value10}</td>
-                <td class="v11" style="background-color: ${item.color_value11}">${item.rank_value11}</td>
-                <td><button class="save-btn">Save</button></td>
-            `;
-            return row;
-        }
-
-        function populateTable(tbody, items) {
-            tbody.innerHTML = '';
-            items.forEach(item => {
-                tbody.appendChild(createRow(item));
-            });
-        }
-
-        document.getElementById('generate-btn').addEventListener('click', async () => {
-            const response = await fetch('/generate');
-            const data = await response.json();
-
-            const tbody1 = document.getElementById('table-1-body');
-            const tbody2 = document.getElementById('table-2-body');
-
-            populateTable(tbody1, data.teamA);  // Team A (5 items)
-            populateTable(tbody2, data.teamB);  // Team B (5 items)
-
-            document.querySelectorAll('.save-btn').forEach(btn => {
-                btn.addEventListener('click', handleSave);
-            });
-        });
-
-        async function handleSave(e) {
-            const btn = e.target;
-            const row = btn.closest('tr');
-            const itemId = row.dataset.itemId;
-
-            btn.disabled = true;
-            btn.textContent = 'Saving...';
-
-            const payload = {
-                id: itemId,
-                value1: parseInt(row.querySelector('.v1').value) || 0,
-                value2: parseInt(row.querySelector('.v2').value) || 0,
-                value3: parseInt(row.querySelector('.v3').value) || 0,
-                value4: parseInt(row.querySelector('.v4').value) || 0,
-                value5: parseInt(row.querySelector('.v5').value) || 0,
-                value6: parseInt(row.querySelector('.v6').value) || 0,
-            };
-
-            try {
-                const response = await fetch('/save', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload),
-                });
-                if (response.ok) {
-                    btn.textContent = 'Saved!';
-                } else {
-                    throw new Error('Save failed');
-                }
-            } catch (err) {
-                btn.textContent = 'Save';
-                btn.disabled = false;
-                alert('Error saving');
-            }
-        }
-    </script>
+    <h1>My App</h1>
+    <a href="/generate-page">Generate</a>
+    <a href="/view">View All Items</a>
 </body>
 
 </html>

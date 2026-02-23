@@ -6,16 +6,25 @@ Parameters:
     Default: my-app
     Description: Name for the Lightsail instance
 
+  BlueprintId:
+    Type: String
+    Default: debian_13
+    Description: Lightsail blueprint (e.g., debian_12, debian_13, ubuntu_24_04)
+
   SyncthingBucket:
     Type: String
     Description: S3 bucket containing Syncthing cert.pem and key.pem
+
+  GitRepo:
+    Type: String
+    Description: Git repository URL (e.g., https://github.com/user/repo.git)
 
 Resources:
   Instance:
     Type: AWS::Lightsail::Instance
     Properties:
       InstanceName: !Ref InstanceName
-      BlueprintId: debian_13
+      BlueprintId: !Ref BlueprintId
       BundleId: nano_3_0
       UserData: !Sub |
         #!/bin/bash
@@ -48,21 +57,52 @@ Resources:
         systemctl enable syncthing@root
         systemctl start syncthing@root
 
-        # Install Python and Flask (remove if using Go/Node instead)
-        apt install -y python3 python3-pip python3-venv
+        # Install Python and Flask dependencies
+        apt install -y python3 python3-pip python3-venv git
 
-        # Create app directory
-        mkdir -p /opt/app
+        # Clone app from git
+        git clone ${GitRepo} /opt/app
         cd /opt/app
 
-        # TODO: Clone your app from Git
-        # git clone https://github.com/youruser/yourrepo.git .
+        # Create virtualenv and install dependencies
+        python3 -m venv venv
+        source venv/bin/activate
+        pip install -r requirements.txt
 
-        # TODO: Set up and run your app
-        # python3 -m venv venv
-        # source venv/bin/activate
-        # pip install -r requirements
-        # systemctl enable myapp  # (create a systemd unit for your app)
+        # Create systemd service for the Flask app
+        cat > /etc/systemd/system/myapp.service <<EOF
+        [Unit]
+        Description=Flask App
+        After=network.target
+
+        [Service]
+        User=root
+        WorkingDirectory=/opt/app
+        Environment="PATH=/opt/app/venv/bin"
+        Environment="DYNAMODB_TABLE=items"
+        ExecStart=/opt/app/venv/bin/gunicorn -w 3 -b 0.0.0.0:5000 --access-logfile - --error-logfile - "app:create_app()"
+        Restart=always
+        RestartSec=5
+
+        [Install]
+        WantedBy=multi-user.target
+        EOF
+
+        # Enable and start the app
+        systemctl daemon-reload
+        systemctl enable myapp
+        systemctl start myapp
+
+        # Create a deploy script for updates
+        cat > /opt/deploy.sh <<'DEPLOY'
+        #!/bin/bash
+        cd /opt/app
+        git pull
+        source venv/bin/activate
+        pip install -r requirements.txt
+        systemctl restart myapp
+        DEPLOY
+        chmod +x /opt/deploy.sh
 
   StaticIp:
     Type: AWS::Lightsail::StaticIp

@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Lightsail Container Service
+
+Parameters:
+  ServiceName:
+    Type: String
+    Default: my-app
+    Description: Name for the container service
+
+  Power:
+    Type: String
+    Default: nano
+    AllowedValues: [nano, micro, small, medium, large, xlarge]
+    Description: Container power (nano=512MB/0.25vCPU, micro=1GB/0.5vCPU, etc.)
+
+  Scale:
+    Type: Number
+    Default: 1
+    MinValue: 1
+    MaxValue: 20
+    Description: Number of container nodes
+
+  ContainerRoleArn:
+    Type: String
+    Description: ARN of IAM role for container to access DynamoDB
+
+Resources:
+  # Lightsail Container Service
+  ContainerService:
+    Type: AWS::Lightsail::Container
+    Properties:
+      ServiceName: !Ref ServiceName
+      Power: !Ref Power
+      Scale: !Ref Scale
+      PublicDomainNames: []
+
+  # Attach IAM role after stack creation - CloudFormation doesn't support this directly
+  # Run this after deploy:
+  # aws lightsail update-container-service \
+  #   --service-name my-app \
+  #   --public-domain-names '{}' \
+  #   --private-registry-access ecrImagePullerRole={isActive=true,principalArn=<ROLE_ARN>}
+
+Outputs:
+  ServiceName:
+    Value: !Ref ContainerService
+    Description: Container service name
+
+  ServiceUrl:
+    Value: !Sub "https://${ServiceName}.${AWS::Region}.cs.amazonlightsail.com"
+    Description: Container service URL (available after first deployment)

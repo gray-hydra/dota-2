@@ -1,0 +1,30 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "PushAndDeploy",
+            "Effect": "Allow",
+            "Action": [
+                "lightsail:RegisterContainerImage",
+                "lightsail:CreateContainerServiceDeployment",
+                "lightsail:CreateContainerServiceRegistryLogin",
+                "lightsail:GetContainerImages",
+                "lightsail:GetContainerServiceDeployments",
+                "lightsail:GetContainerServices",
+                "lightsail:GetContainerLog"
+            ],
+            "Resource": "arn:aws:lightsail:*:*:ContainerService/my-app"
+        },
+        {
+            "Sid": "DenyCreateResources",
+            "Effect": "Deny",
+            "Action": [
+                "lightsail:CreateContainerService",
+                "lightsail:CreateInstance*",
+                "lightsail:CreateDisk*",
+                "lightsail:CreateLoadBalancer*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

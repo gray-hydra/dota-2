@@ -1,0 +1,65 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "CloudFormation",
+            "Effect": "Allow",
+            "Action": [
+                "cloudformation:CreateStack",
+                "cloudformation:UpdateStack",
+                "cloudformation:DeleteStack",
+                "cloudformation:DescribeStacks",
+                "cloudformation:DescribeStackEvents",
+                "cloudformation:DescribeStackResources",
+                "cloudformation:GetTemplate",
+                "cloudformation:ValidateTemplate",
+                "cloudformation:ListStacks"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "ForAllValues:StringEquals": {
+                    "cloudformation:ResourceTypes": [
+                        "AWS::DynamoDB::Table",
+                        "AWS::Lightsail::Container"
+                    ]
+                }
+            }
+        },
+        {
+            "Sid": "DynamoDB",
+            "Effect": "Allow",
+            "Action": [
+                "dynamodb:CreateTable",
+                "dynamodb:DeleteTable",
+                "dynamodb:DescribeTable",
+                "dynamodb:UpdateTable",
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:Query",
+                "dynamodb:Scan",
+                "dynamodb:BatchGetItem",
+                "dynamodb:BatchWriteItem"
+            ],
+            "Resource": "arn:aws:dynamodb:*:*:table/items*"
+        },
+        {
+            "Sid": "LightsailContainerAdmin",
+            "Effect": "Allow",
+            "Action": [
+                "lightsail:CreateContainerService",
+                "lightsail:CreateContainerServiceRegistryLogin",
+                "lightsail:UpdateContainerService",
+                "lightsail:DeleteContainerService",
+                "lightsail:GetContainerServices",
+                "lightsail:GetContainerImages",
+                "lightsail:GetContainerServiceDeployments",
+                "lightsail:GetContainerLog",
+                "lightsail:RegisterContainerImage",
+                "lightsail:CreateContainerServiceDeployment"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
